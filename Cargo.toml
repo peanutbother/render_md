@@ -1,0 +1,21 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[workspace.dependencies]
+render_md = { path = "crates/render_md" }
+render_md_cgi = { path = "crates/render_md_cgi" }
+gray_matter = "0.3.2"
+http = "1.5.0"
+miette = { version = "7.6.0", features = ["serde"] }
+pulldown-cmark = "0.13.4"
+serde = { version = "1.0", features = ["serde_derive"] }
+tempfile = "3.27.0"
+thiserror = "2.0.20"
+thiserror-ext = "0.3"
+walkdir = "2.5.0"

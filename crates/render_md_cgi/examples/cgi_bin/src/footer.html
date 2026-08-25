@@ -1,0 +1,24 @@
+<footer class="bg-base-200 p-10 text-base-content footer sm:footer-horizontal">
+    <aside>
+        <img width="50" height="50" src="/assets/logo.svg" class="fill-current" aria-label="Site Logo" />
+        <p>
+            Example Page
+            <br />
+            Providing static HTML through render_md
+        </p>
+    </aside>
+</footer>
+
+<script>
+    // applies theme of site from localstorage on page load
+    document.addEventListener("readystatechange",
+        () => {
+            if (document.readyState === "interactive") {
+                document.querySelector(".theme-controller").checked = localStorage.theme === "dark";
+            }
+        }
+    );
+    // stores theme of site in localstorage
+    document.querySelector(".theme-controller").addEventListener("click",
+        e => localStorage.theme = e.target.checked ? "dark" : "light");
+</script>

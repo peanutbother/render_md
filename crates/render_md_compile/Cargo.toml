@@ -1,0 +1,19 @@
+[package]
+name = "render_md_compile"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "compile_md"
+path = "src/main.rs"
+
+[features]
+default = []
+detailed-errors = ["render_md/detailed-errors"]
+
+[dependencies]
+render_md.workspace = true
+miette.workspace = true
+walkdir.workspace = true
+clap = { version = "4", features = ["derive"] }

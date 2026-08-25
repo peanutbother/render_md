@@ -1,0 +1,20 @@
+[package]
+name = "render_md"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[features]
+default = []
+detailed-errors = ["miette/fancy"]
+
+[dependencies]
+gray_matter.workspace = true
+http.workspace = true
+miette.workspace = true
+pulldown-cmark.workspace = true
+serde.workspace = true
+tempfile.workspace = true
+thiserror.workspace = true
+thiserror-ext.workspace = true
+walkdir.workspace = true

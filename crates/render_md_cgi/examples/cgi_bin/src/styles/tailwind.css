@@ -1,0 +1,55 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "./daisyui.mjs" ;
+
+@plugin "./daisyui-theme.mjs" {
+  name: "light";
+  default: true;
+  --color-primary: #d84d20;
+}
+
+@plugin "./daisyui-theme.mjs" {
+  name: "dark";
+  prefersdark: true;
+  --color-primary: #d84d20;
+}
+
+h1 {
+  @apply  text-primary mb-4 mt-6 text-4xl font-extrabold
+}
+
+h2 {
+  @apply  text-primary mb-4 mt-6 text-3xl font-extrabold
+}
+
+h3 {
+  @apply  text-primary mb-4 mt-6 text-2xl font-extrabold
+}
+
+h4 {
+  @apply  text-primary mb-4 mt-6 text-xl font-extrabold
+}
+
+p {
+  @apply  mb-4 text-lg leading-relaxed
+}
+
+ul {
+  @apply  list-inside list-disc space-y-2
+}
+
+blockquote {
+  @apply  border-l-4 border-gray-300 pl-4 italic text-gray-600
+}
+
+pre:has(code) {
+  @apply text-primary-content rounded-xl bg-gray-800 p-4 dark:bg-gray-950 overflow-x-auto whitespace-pre;
+}
+
+pre code {
+  @apply block min-w-full whitespace-pre;
+}
+
+table {
+  @apply table
+}

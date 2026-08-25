@@ -1,0 +1,23 @@
+[package]
+name = "render_md_cgi"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "render_md"
+path = "src/main.rs"
+
+
+[features]
+default = []
+detailed-errors = ["render_md/detailed-errors"]
+
+
+[dependencies]
+render_md.workspace = true
+http.workspace = true
+miette.workspace = true
