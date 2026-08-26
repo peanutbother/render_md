@@ -30,7 +30,7 @@ pre[class*="language-"] {
 .token.prolog,
 .token.doctype,
 .token.cdata {
-	color: var(--color-neutral-content);
+	color: var(--color-base-content);
 	opacity: 0.7;
 	font-style: italic;
 }
