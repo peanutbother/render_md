@@ -4,7 +4,7 @@ tags:
     ol: list-decimal pl-10
     ul: pl-6
 blocks:
-    tip: shadow-sm my-6
+    tip: alert shadow-sm my-6 block
 tagline: a tiny templating engine for turning markdown into a static, or lazily-rendered, site
 status: online
 greeter: friend
