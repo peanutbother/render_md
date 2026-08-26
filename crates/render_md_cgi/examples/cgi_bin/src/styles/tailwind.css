@@ -6,16 +6,19 @@
   name: "light";
   default: true;
   --color-primary: #d84d20;
+  --color-primary-code: #d84d2040;
 }
 
 @plugin "./daisyui-theme.mjs" {
   name: "dark";
   prefersdark: true;
   --color-primary: #d84d20;
+  --color-primary-code: #d84d20ad;
 }
 
 h1 {
   @apply mt-6 mb-4 text-4xl font-extrabold text-primary;
+  text-shadow: 4px 6px 5px rgba(0, 0, 0, 0.4);
 }
 
 h2 {
@@ -52,13 +55,20 @@ ul {
 blockquote {
   @apply border-l-4 border-gray-300 pl-4 text-gray-600 italic;
 }
+:root:has(input.theme-controller[value=dark]:checked) blockquote {
+  @apply text-gray-400;
+}
 
 pre {
   @apply block mb-4;
 }
 
 pre:has(code) {
-  @apply overflow-x-auto rounded-xl bg-gray-800 p-4 whitespace-pre text-primary-content;
+  @apply overflow-x-auto rounded-xl bg-base-200 p-4 whitespace-pre text-primary-content shadow-md;
+}
+:root:has(input.theme-controller[value=dark]:checked)
+pre:has(code) {
+  @apply text-base-content;
 }
 
 pre code {
@@ -66,11 +76,12 @@ pre code {
 }
 
 :not(pre) > code {
-  @apply bg-slate-300 text-base-content;
+  @apply text-base-content;
+  background-color: var(--color-primary-code)
 }
 
 :root:has(input.theme-controller[value=dark]:checked) :not(pre) > code {
-  @apply bg-slate-400 text-gray-800;
+  background-color: var(--color-primary-code)
 }
 
 table {

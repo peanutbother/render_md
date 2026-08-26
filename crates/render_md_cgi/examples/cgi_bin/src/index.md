@@ -4,7 +4,7 @@ tags:
     ol: list-decimal pl-10
     ul: pl-6
 blocks:
-    tip: alert my-6 block whitespace-pre shadow-sm
+    tip: alert my-6 block whitespace-pre shadow-md
     filler: pb-4
 tagline: a tiny templating engine for turning markdown into a static, or lazily-rendered, site
 status: online

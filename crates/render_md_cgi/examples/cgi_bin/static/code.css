@@ -1,6 +1,6 @@
 code[class*="language-"],
 pre[class*="language-"] {
-	color: var(--color-primary-content);
+	color: var(--color-base-content);
 	text-align: left;
 	white-space: pre;
 	word-spacing: normal;
