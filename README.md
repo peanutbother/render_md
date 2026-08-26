@@ -3,7 +3,7 @@
 A small Rust library for turning a directory of Markdown files into a static site (or a lazily-rendered, cached one), with a minimal templating language for variables, includes, conditionals, and styled blocks layered on
 top of [pulldown-cmark](https://crates.io/crates/pulldown-cmark).
 
-It was built to power CGI-rendered personal/homelab sites,=500x300=500x300 but the core
+It was built to power CGI-rendered personal/homelab sites, but the core
 `RenderEngine` has no web-server or CGI dependency — it just reads files and
 returns/writes HTML strings, so it's equally usable from a one-off static
 site generator, a build script, or a long-running server.
