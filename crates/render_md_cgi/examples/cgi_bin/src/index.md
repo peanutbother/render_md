@@ -4,7 +4,8 @@ tags:
     ol: list-decimal pl-10
     ul: pl-6
 blocks:
-    tip: alert shadow-sm my-6 block
+    tip: alert my-6 block whitespace-pre shadow-sm
+    filler: pb-4
 tagline: a tiny templating engine for turning markdown into a static, or lazily-rendered, site
 status: online
 greeter: friend
@@ -20,38 +21,90 @@ including a [full Markdown tour](#markdown-tour) further down.
 ## Variables and filters
 
 Front matter can declare arbitrary custom variables, interpolated with
-{\{.var}\} and optionally piped through filters (`upper`, `lower`, `trim`,
+`\{{.var}}` and optionally piped through filters (`upper`, `lower`, `trim`,
 `title`):
 
-- Plain: {{.var tagline}}
-- Uppercased: {{.var tagline | upper}}
-- Title-cased: {{.var tagline | title}}
+- Plain:
+{{.block tip}}
+`\{{.var tagline}}` *becomes* {{.var tagline}}
+{{.end}}
+- Uppercased:
+{{.block tip}}
+`\{{.var tagline | upper}}` *becomes* {{.var tagline | upper}}
+{{.end}}
+- Title-cased:
+{{.block tip}}
+`\{{.var tagline | title}}` *becomes* {{.var tagline | title}}
+{{.end}}
 
 ## Conditionals
 
-{\{.if}\}/{\{.else}\}/{\{.end}\} branch on a variable's truthiness, or on a
+`\{{.if}}` / `\{{.else}}` / `\{{.end}}` branch on a variable's truthiness, or on a
 comparison against a literal or another variable:
 
-{{.if status == "online"}}
-🟢 Status: **{{.var status}}**
-{{.else}}
-🔴 Status: offline
+{{.block tip}}
+  \{{.if status == "online"}}
+  🟢 Status: \*\*\{{.var status}}\*\*
+  \{{.else}}
+  🔴 Status: offline
+  \{{.end}}
 {{.end}}
 
-{{.if !nonexistent}}
-A missing variable in a condition is just falsy rather than an error,
-unlike {\{.var}\} — `nonexistent` was never set, and this whole paragraph
-only exists because {\{.if !nonexistent}\} evaluated true.
+becomes
+
+{{.block tip}}
+  {{.if status == "online"}}
+  🟢 Status: **{{.var status}}**
+  {{.else}}
+  🔴 Status: offline
+  {{.end}}
+{{.end}}
+
+You can also check if a variable is set:
+
+{{.block tip}}
+  `\{{.if !nonexistent}}`
+  A missing variable in a condition is just falsy rather than an error,
+  unlike `\{{.var}}` — `nonexistent` was never set, and this whole paragraph
+  only exists because `\{{.if !nonexistent}}` evaluated true.
+  `\{{.end}}`
+
+  `\{{.if nonexistent}}`
+  This paragraph will never show.
+  `\{{.end}}`
+{{.end}}
+
+becomes
+
+{{.block tip}}
+  {{.if !nonexistent}}
+  A missing variable in a condition is just falsy rather than an error,
+  unlike `\{{.var}}` — `nonexistent` was never set, and this whole paragraph
+  only exists because `\{{.if !nonexistent}}` evaluated true.
+  {{.end}}
+
+  {{.if nonexistent}}
+  This paragraph will never show.
+  {{.end}}
 {{.end}}
 
 ## Styled blocks
 
-{\{.block name}\}...{\{.end}\} wraps its content in a `<div>`, resolving
+`\{{.block name}}...\{{.end}}` wraps its content in a `<div>`, resolving
 `name` against this page's own `blocks` front matter — or falling back to
 using `name` itself as the class list if it isn't mapped:
 
 {{.block tip}}
-This callout is a {\{.block tip}\}...{\{.end}\}, not hand-written HTML —
+  `\{{.block tip}}`
+  This callout is a `\{{.block tip}}...\{{.end}}`, not hand-written HTML —
+  its class comes from this page's front matter.
+  `\{{.end}}`
+{{.end}}
+
+becomes
+
+{{.block tip}}
+This callout is a `\{{.block tip}}...\{{.end}}`, not hand-written HTML —
 its class comes from this page's front matter.
 {{.end}}
 
@@ -62,13 +115,53 @@ Any included file can declare its own `args` schema in front matter.
 few different ways:
 
 - Shorthand — resolves `greeter` from this page's own scope (set to
-  "friend" above): {{.include about/greeter.md greeter}}
-- Quoted literal: {{.include about/greeter.md greeter="World"}}
-- A literal with a nested directive inside it: {{.include about/greeter.md greeter="{{.var tagline | title}}"}}
-- A variable, filtered before it's passed along: {{.include about/greeter.md greeter=status | upper}}
+  "friend" above):  
 
-Written out, that first line's directive looks like this: {\{.include
-about/greeter.md greeter}\} renders {{.include about/greeter.md greeter}}.
+{{.block tip}}
+  `\{{.include about/greeter.md greeter}}`
+{{.end}}
+
+  becomes
+
+{{.block tip}}
+  {{.include about/greeter.md greeter}}  
+{{.end}}
+
+- Quoted literal:
+
+{{.block tip}}
+  `\{{.include about/greeter.md greeter="World"}}`
+{{.end}}
+
+becomes
+
+{{.block tip}}
+  {{.include about/greeter.md greeter="World"}}
+{{.end}}
+
+- A literal with a nested directive inside it:
+
+{{.block tip}}
+  `\{{.include about/greeter.md greeter="{{.var tagline | title}}"}}`
+{{.end}}
+
+becomes
+
+{{.block tip}}
+  {{.include about/greeter.md greeter="{{.var tagline | title}}"}}
+{{.end}}
+
+- A variable, filtered before it's passed along:
+
+{{.block tip}}
+  `\{{.include about/greeter.md greeter=status | upper}}`
+{{.end}}
+
+becomes
+
+{{.block tip}}
+  {{.include about/greeter.md greeter=status | upper}}
+{{.end}}
 
 ## Markdown, in full {#markdown-tour}
 
@@ -104,18 +197,22 @@ ordinary components with their own `args` schema. Included here to prove
 it, not because anything's actually broken:
 
 {{.block tip}}
-{{.include _404.md}}
+  {{.include _404.md}}
 {{.end}}
 
-{{.block tip}}
 `_500.md` declares `error: "An unknown error occurred"` as a *default*
 argument, unlike `greeter.md`'s *required* one above — omitted here, so
 the default renders:
 
-{{.include _500.md}}
+{{.block tip}}
+  {{.include _500.md}}
 {{.end}}
 
-{{.include syntax-highlighting.html}}
+{{.block filler}}{{.end}}
+
+---
+
+The boilerplate code of this website is quite little:
 
 ```rust
 // crates/render_md_compile drives the same RenderEngine this page does,
@@ -124,8 +221,4 @@ let engine = RenderEngine::<gray_matter::engine::YAML>::new(paths, options);
 engine.compile_page(&src_md, &public_html, &mut vars)?;
 ```
 
-```js
-// the theme toggle in footer.html, persisted across visits
-document.querySelector(".theme-controller")
-  .addEventListener("click", e => localStorage.theme = e.target.checked ? "dark" : "light");
-```
+{{.include syntax-highlighting.html}}

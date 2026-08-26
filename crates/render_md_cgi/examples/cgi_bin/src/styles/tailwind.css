@@ -15,35 +15,50 @@
 }
 
 h1 {
-  @apply  text-primary mb-4 mt-6 text-4xl font-extrabold
+  @apply mt-6 mb-4 text-4xl font-extrabold text-primary;
 }
 
 h2 {
-  @apply  text-primary mb-4 mt-6 text-3xl font-extrabold
+  @apply mt-6 mb-4 text-3xl font-extrabold text-primary;
 }
 
 h3 {
-  @apply  text-primary mb-4 mt-6 text-2xl font-extrabold
+  @apply mt-6 mb-4 text-2xl font-extrabold text-primary;
 }
 
 h4 {
-  @apply  text-primary mb-4 mt-6 text-xl font-extrabold
+  @apply font-extrabold text-primary mt-6 mb-4 text-xl;
+}
+
+hr {
+  @apply py-4;
 }
 
 p {
-  @apply  mb-4 text-lg leading-relaxed
+  @apply mb-4 text-lg leading-relaxed;
+}
+
+.alert :first-child {
+  @apply mt-0;
+}
+.alert :last-child {
+  @apply mb-0;
 }
 
 ul {
-  @apply  list-inside list-disc space-y-2
+  @apply list-inside list-disc space-y-2;
 }
 
 blockquote {
-  @apply  border-l-4 border-gray-300 pl-4 italic text-gray-600
+  @apply border-l-4 border-gray-300 pl-4 text-gray-600 italic;
+}
+
+pre {
+  @apply block mb-4;
 }
 
 pre:has(code) {
-  @apply text-primary-content rounded-xl bg-gray-800 p-4 dark:bg-gray-950 overflow-x-auto whitespace-pre;
+  @apply overflow-x-auto rounded-xl bg-gray-800 p-4 whitespace-pre text-primary-content;
 }
 
 pre code {
@@ -51,9 +66,20 @@ pre code {
 }
 
 :not(pre) > code {
-  @apply bg-secondary-content text-gray-600;
+  @apply bg-slate-300 text-base-content;
+}
+
+:root:has(input.theme-controller[value=dark]:checked) :not(pre) > code {
+  @apply bg-slate-400 text-gray-800;
 }
 
 table {
   @apply table
+}
+
+.tip :first-child {
+  @apply mt-0;
+}
+.tip :last-child {
+  @apply mb-0;
 }

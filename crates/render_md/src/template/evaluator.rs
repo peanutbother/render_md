@@ -1,7 +1,7 @@
 use super::condition;
 use super::environment::Environment;
 use super::filters;
-use super::lexer::{Directive, TagScanner};
+use super::lexer::{Directive, TagScanner, unescape_tag_markers};
 use crate::Error;
 use miette::SourceSpan;
 use std::path::Path;
@@ -41,7 +41,9 @@ impl Evaluator {
 
         while let Some(tag_match) = scanner.next_tag(cursor)? {
             if is_emitting {
-                result.push_str(&content[cursor..tag_match.match_start]);
+                result.push_str(&unescape_tag_markers(
+                    &content[cursor..tag_match.match_start],
+                ));
             }
 
             let resolved_value = match tag_match.directive {
@@ -159,7 +161,7 @@ impl Evaluator {
         }
 
         if is_emitting {
-            result.push_str(&content[cursor..]);
+            result.push_str(&unescape_tag_markers(&content[cursor..]));
         }
         Ok(result)
     }
@@ -446,5 +448,57 @@ mod tests {
             crate::ErrorKind::VariableNotFound { var_name, .. } => assert_eq!(var_name, "missing"),
             _ => panic!("expected VariableNotFound, got {:?}", err),
         }
+    }
+
+    #[test]
+    fn test_evaluate_escaped_tag_renders_literally_without_backslash() {
+        let env = FakeEnv::new();
+        let result = Evaluator::evaluate(r#"\{{.if missing}}"#, &path(), &env).unwrap();
+        assert_eq!(result, r#"{{.if missing}}"#);
+    }
+
+    #[test]
+    fn test_evaluate_escaped_tag_does_not_error_even_if_it_looks_broken() {
+        // A directive that would otherwise error (unknown filter, missing
+        // var, etc.) is never parsed or evaluated at all once escaped —
+        // it's just literal text.
+        let env = FakeEnv::new();
+        let result = Evaluator::evaluate(r#"\{{.var missing | bogus}}"#, &path(), &env).unwrap();
+        assert_eq!(result, r#"{{.var missing | bogus}}"#);
+    }
+
+    #[test]
+    fn test_evaluate_escaped_tag_mixed_with_real_tag() {
+        let env = FakeEnv::new().with_var("name", "World");
+        let result = Evaluator::evaluate(
+            r#"\{{.var name}} says {{.var name}}"#,
+            &path(),
+            &env,
+        )
+        .unwrap();
+        assert_eq!(result, r#"{{.var name}} says World"#);
+    }
+
+    #[test]
+    fn test_evaluate_multiline_escaped_tip_block_renders_literally() {
+        // Mirrors a documentation snippet showing the `.if`/`.else`/`.end`
+        // syntax itself, escaped so it's not evaluated.
+        let env = FakeEnv::new();
+        let template = concat!(
+            "\\{{.if status == \"online\"}}\n",
+            "🟢 Status: **\\{{.var status}}**\n",
+            "\\{{.else}}\n",
+            "🔴 Status: offline\n",
+            "\\{{.end}}",
+        );
+        let expected = concat!(
+            "{{.if status == \"online\"}}\n",
+            "🟢 Status: **{{.var status}}**\n",
+            "{{.else}}\n",
+            "🔴 Status: offline\n",
+            "{{.end}}",
+        );
+        let result = Evaluator::evaluate(template, &path(), &env).unwrap();
+        assert_eq!(result, expected);
     }
 }

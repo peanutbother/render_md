@@ -45,14 +45,28 @@ impl<'a> TagScanner<'a> {
         }
     }
 
-    /// Finds the next directive tag in input starting at `offset`
+    /// Finds the next directive tag in input starting at `offset`. A
+    /// backslash immediately before `{{.` escapes it: that occurrence is
+    /// treated as literal text, not a directive start, and scanning
+    /// continues past it. See `unescape_tag_markers` for how the escaping
+    /// backslash is stripped from the rendered output.
     pub fn next_tag(&self, offset: usize) -> Result<Option<TagMatch<'a>>, Error> {
-        let remaining = &self.src[offset..];
-        let Some(rel_start) = remaining.find("{{.") else {
-            return Ok(None);
+        let mut search_from = offset;
+        let start_pos = loop {
+            let remaining = &self.src[search_from..];
+            let Some(rel_start) = remaining.find("{{.") else {
+                return Ok(None);
+            };
+            let candidate = search_from + rel_start;
+
+            if candidate > 0 && self.src.as_bytes()[candidate - 1] == b'\\' {
+                search_from = candidate + 3; // past "{{."
+                continue;
+            }
+
+            break candidate;
         };
 
-        let start_pos = offset + rel_start;
         let tag_body = &self.src[start_pos + 3..];
 
         let Some(rel_end) = find_tag_end(tag_body) else {
@@ -154,6 +168,22 @@ fn find_tag_end(tag_body: &str) -> Option<usize> {
     }
 
     None
+}
+
+/// Un-escapes a raw text span before it's emitted as output: a backslash
+/// immediately before `{{.` (used by `next_tag` to skip that occurrence
+/// rather than parsing it as a directive — see `next_tag`'s doc comment) is
+/// stripped, leaving the literal `{{.` in the rendered output. Any other
+/// backslash (in prose, or before something that isn't `{{.`) is left
+/// untouched.
+///
+/// This is safe to apply unconditionally to any raw-text span the
+/// evaluator emits: a `\{{.` substring can only survive into such a span
+/// because `next_tag` recognized it as an escape and skipped past it — a
+/// *real* tag start would already have been split out as its own
+/// `TagMatch` and would never appear inside a raw-text span at all.
+pub(crate) fn unescape_tag_markers(s: &str) -> String {
+    s.replace("\\{{.", "{{.")
 }
 
 #[cfg(test)]
@@ -435,5 +465,35 @@ mod tests {
 
         let second = s.next_tag(first.match_end).unwrap().unwrap();
         assert_eq!(second.directive, Directive::Var("b"));
+    }
+
+    #[test]
+    fn test_next_tag_returns_none_when_only_escaped_tag_present() {
+        let s = scanner(r#"\{{.var x}}"#);
+        assert!(s.next_tag(0).unwrap().is_none());
+    }
+
+    #[test]
+    fn test_next_tag_skips_escaped_tag_and_finds_next_real_tag() {
+        let s = scanner(r#"\{{.var x}} {{.var y}}"#);
+        let tag = s.next_tag(0).unwrap().unwrap();
+        assert_eq!(tag.directive, Directive::Var("y"));
+    }
+
+    #[test]
+    fn test_unescape_tag_markers_strips_leading_backslash() {
+        assert_eq!(
+            unescape_tag_markers(r#"\{{.if status == "online"}}"#),
+            r#"{{.if status == "online"}}"#
+        );
+    }
+
+    #[test]
+    fn test_unescape_tag_markers_leaves_unrelated_backslashes_untouched() {
+        // Only a backslash directly preceding `{{.` is an escape marker;
+        // any other backslash (a literal one in prose, or one before a
+        // dot-less `{{`, which isn't a directive marker at all) is left as-is.
+        assert_eq!(unescape_tag_markers(r"C:\Users\foo"), r"C:\Users\foo");
+        assert_eq!(unescape_tag_markers(r"\{{title}}"), r"\{{title}}");
     }
 }

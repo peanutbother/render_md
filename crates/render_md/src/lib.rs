@@ -919,6 +919,29 @@ mod tests {
     }
 
     #[test]
+    fn test_escaped_directives_in_fenced_code_block_render_literally_end_to_end() {
+        // A documentation snippet showing `.if`/`.var`/`.else`/`.end`
+        // syntax itself, inside a fenced code block, escaped with a
+        // leading backslash so it's shown rather than evaluated.
+        let (_tmp, src_dir, engine) = setup_env();
+        let content = concat!(
+            "```tip\n",
+            "\\{{.if status == \"online\"}}\n",
+            "Status: \\{{.var status}}\n",
+            "\\{{.else}}\n",
+            "Status: offline\n",
+            "\\{{.end}}\n",
+            "```",
+        );
+        let result = render(&engine, &src_dir, "index.md", content).unwrap();
+        assert!(!result.contains('\\'), "output should have no backslashes: {result}");
+        assert!(result.contains(r#"{{.if status == "online"}}"#));
+        assert!(result.contains("{{.var status}}"));
+        assert!(result.contains("{{.else}}"));
+        assert!(result.contains("{{.end}}"));
+    }
+
+    #[test]
     fn test_block_and_end_directives_render_wrapping_div() {
         let (_tmp, src_dir, engine) = setup_env();
         let result = render(
