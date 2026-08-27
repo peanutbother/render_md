@@ -48,6 +48,10 @@ p {
   @apply mb-0;
 }
 
+a {
+  @apply text-primary;
+}
+
 ul {
   @apply list-inside list-disc space-y-2;
 }
