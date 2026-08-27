@@ -57,10 +57,11 @@ ul {
 }
 
 blockquote {
-  @apply border-l-4 border-gray-300 pl-4 text-gray-600 italic;
+  @apply border-l-4 border-gray-300 pl-4 text-gray-800 italic bg-base-content/5;
 }
+
 :root:has(input.theme-controller[value=dark]:checked) blockquote {
-  @apply text-gray-400;
+  @apply text-gray-300 bg-base-content/5;
 }
 
 pre {
