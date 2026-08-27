@@ -6,6 +6,7 @@ members = ["crates/*"]
 version = "0.1.0"
 edition = "2024"
 license = "MIT"
+repository = "https://github.com/peanutbother/render_md"
 
 [workspace.dependencies]
 render_md = { path = "crates/render_md" }
