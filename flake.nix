@@ -74,7 +74,7 @@
             name = "render_md-bins";
             paths = [ render_md compile_md ];
           };
-          inherit render_md compile_md;
+          inherit render_md render_md_detailed compile_md compile_md_detailed;
         };
 
         apps = {
