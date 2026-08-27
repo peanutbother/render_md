@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
-@plugin "./daisyui.mjs" ;
+@plugin "./daisyui.mjs";
 
 @plugin "./daisyui-theme.mjs" {
   name: "light";
@@ -60,7 +60,7 @@ blockquote {
   @apply border-l-4 border-gray-300 pl-4 text-gray-800 italic bg-base-content/5;
 }
 
-:root:has(input.theme-controller[value=dark]:checked) blockquote {
+:root:has(input.theme-controller[value="dark"]:checked) blockquote {
   @apply text-gray-300 bg-base-content/5;
 }
 
@@ -69,10 +69,9 @@ pre {
 }
 
 pre:has(code) {
-  @apply overflow-x-auto rounded-xl bg-base-200 p-4 whitespace-pre text-primary-content shadow-md;
+  @apply overflow-x-auto rounded-xl bg-base-200 p-4 whitespace-pre text-base-content shadow-md;
 }
-:root:has(input.theme-controller[value=dark]:checked)
-pre:has(code) {
+:root:has(input.theme-controller[value="dark"]:checked) pre:has(code) {
   @apply text-base-content;
 }
 
@@ -82,15 +81,15 @@ pre code {
 
 :not(pre) > code {
   @apply text-base-content;
-  background-color: var(--color-primary-code)
+  background-color: var(--color-primary-code);
 }
 
-:root:has(input.theme-controller[value=dark]:checked) :not(pre) > code {
-  background-color: var(--color-primary-code)
+:root:has(input.theme-controller[value="dark"]:checked) :not(pre) > code {
+  background-color: var(--color-primary-code);
 }
 
 table {
-  @apply table
+  @apply table;
 }
 
 .tip :first-child {
