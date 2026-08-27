@@ -9,8 +9,8 @@ license = "MIT"
 repository = "https://github.com/peanutbother/render_md"
 
 [workspace.dependencies]
-render_md = { path = "crates/render_md" }
-render_md_cgi = { path = "crates/render_md_cgi" }
+render_md = { path = "crates/render_md", version = "0.1.0" }
+render_md_cgi = { path = "crates/render_md_cgi", version = "0.1.0" }
 gray_matter = "0.3.2"
 http = "1.5.0"
 miette = { version = "7.6.0", features = ["serde"] }

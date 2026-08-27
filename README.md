@@ -59,13 +59,9 @@ This is a workspace with three members:
 
 ### Installation
 
-Not yet published to crates.io — depend on it via git or a local path:
-
 ```toml
 [dependencies]
-render_md = { git = "https://github.com/peanutbother/render_md" }
-# or, from elsewhere in this workspace:
-render_md = { path = "../render_md" }
+render_md = "0.1.0"
 ```
 
 Enable detailed, source-mapped error output (uses `miette`'s `fancy`
@@ -299,6 +295,13 @@ smaller pieces `serve` is built from — so anything embedding the same
 behavior (like the `cgi_bin` example below, which only differs in what root
 it defaults to) doesn't have to reimplement it.
 
+Install the library with:
+
+```toml
+[dependencies]
+render_md_cgi = "0.1.0"
+```
+
 See [`crates/render_md_cgi/examples/cgi_bin`](crates/render_md_cgi/examples/cgi_bin)
 for a full worked example: sample pages, a Tailwind+daisyUI template, an
 nginx/fastcgi config, and a deploy script.
@@ -307,6 +310,14 @@ nginx/fastcgi config, and a deploy script.
 # run the example from the repo root
 cargo run --example cgi_bin -p render_md_cgi
 ```
+
+Install it with:
+
+```bash
+cargo install render_md_compile
+```
+
+The binary will be called `render_md`.
 
 ## render_md_compile
 
@@ -358,6 +369,14 @@ cargo run -p render_md_compile --bin compile_md -- \
   --base-dir crates/render_md_cgi/examples/cgi_bin \
   --public-dir out
 ```
+
+Install it with:
+
+```bash
+cargo install render_md_compile
+```
+
+The binary will be called `compile_md`.
 
 ## Development
 
