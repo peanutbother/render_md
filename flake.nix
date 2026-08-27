@@ -82,6 +82,7 @@
 
           packages = with pkgs; [
             biome
+            render_md
             compile_md
             rustToolchain
             tailwindcss_4
