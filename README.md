@@ -63,7 +63,7 @@ Not yet published to crates.io — depend on it via git or a local path:
 
 ```toml
 [dependencies]
-render_md = { git = "https://git.yuna.pw/yuna/render_md" }
+render_md = { git = "https://github.com/peanutbother/render_md" }
 # or, from elsewhere in this workspace:
 render_md = { path = "../render_md" }
 ```
