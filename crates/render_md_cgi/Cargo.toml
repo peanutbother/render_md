@@ -4,6 +4,7 @@ version = "0.1.0"
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "A small Rust binary for cached lazy rendering Markdown files into a static site with a minimal templating language for variables, includes, conditionals, and styled blocks layered on top of pulldown-cmark"
 
 [lib]
 path = "src/lib.rs"

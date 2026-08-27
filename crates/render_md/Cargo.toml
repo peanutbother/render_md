@@ -4,6 +4,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
+description = "A small Rust library for turning a directory of Markdown files into a static site (or a lazily-rendered, cached one), with a minimal templating language for variables, includes, conditionals, and styled blocks layered on top of pulldown-cmark"
 
 [features]
 default = []
