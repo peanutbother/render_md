@@ -36,6 +36,11 @@ jobs:
               mv /tmp/index.html crates/render_md_cgi/examples/cgi_bin/public/error
           '
 
+      - name: Rewrite absolute links for the /render_md/ subpath
+        run: |
+          find crates/render_md_cgi/examples/cgi_bin/public -type f -print0 \
+            | xargs -0 sed -i -E 's#(href|src)="/#\1="/render_md/#g'
+
       - uses: actions/upload-pages-artifact@v5
         with:
           path: crates/render_md_cgi/examples/cgi_bin/public
