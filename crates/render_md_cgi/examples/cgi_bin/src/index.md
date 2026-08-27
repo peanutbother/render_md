@@ -210,6 +210,8 @@ the default renders:
 
 {{.block filler}}{{.end}}
 
+You can also see [a dedicated error page here](/error)
+
 ---
 
 The boilerplate code of this website is quite little:
