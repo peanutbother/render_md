@@ -30,9 +30,9 @@ jobs:
               mkdir -p crates/render_md_cgi/examples/cgi_bin/public/{assets,error}
               cp crates/render_md_cgi/examples/cgi_bin/static/* \
               crates/render_md_cgi/examples/cgi_bin/public/assets/
-              compile_md --base-dir crates/render_md_cgi/examples/cgi_bin
+              compile_md --base-dir crates/render_md_cgi/examples/cgi_bin --detailed-errors
               # compile_md does not write failed pages to disk so we have to use render_mds output and skip the headers
-              APP_ROOT=crates/render_md_cgi/examples/cgi_bin/ DOCUMENT_URI=/error render_md 2>&1 | tail -n +4 > /tmp/index.html
+              APP_ROOT=crates/render_md_cgi/examples/cgi_bin/ DOCUMENT_URI=/error DETAILED_ERRORS=1 render_md 2>&1 | tail -n +4 > /tmp/index.html
               mv /tmp/index.html crates/render_md_cgi/examples/cgi_bin/public/error
           '
 

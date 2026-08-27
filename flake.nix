@@ -48,10 +48,22 @@
           cargoExtraArgs = "-p render_md_cgi --bin render_md";
         });
 
+        render_md_detailed = craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+          pname = "render_md";
+          cargoExtraArgs = "-p render_md_cgi --bin render_md --features detailed-errors";
+        });
+
         compile_md = craneLib.buildPackage (commonArgs // {
           inherit cargoArtifacts;
           pname = "compile_md";
           cargoExtraArgs = "-p render_md_compile --bin compile_md";
+        });
+
+        compile_md_detailed = craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+          pname = "compile_md";
+          cargoExtraArgs = "-p render_md_compile --bin compile_md --features detailed-errors";
         });
       in
       {
@@ -70,20 +82,28 @@
             drv = render_md;
             name = "render_md";
           };
+          render_md_detailed = flake-utils.lib.mkApp {
+            drv = render_md_detailed;
+            name = "render_md";
+          };
           compile_md = flake-utils.lib.mkApp {
             drv = compile_md;
+            name = "compile_md";
+          };
+          compile_md_detailed = flake-utils.lib.mkApp {
+            drv = compile_md_detailed;
             name = "compile_md";
           };
         };
 
         # Development environment (`nix develop`)
         devShells.default = craneLib.devShell {
-          inputsFrom = [ render_md compile_md ];
+          inputsFrom = [ render_md_detailed compile_md ];
 
           packages = with pkgs; [
             biome
-            render_md
-            compile_md
+            compile_md_detailed
+            render_md_detailed
             rustToolchain
             tailwindcss_4
           ];
