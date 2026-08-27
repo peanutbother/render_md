@@ -111,56 +111,56 @@ its class comes from this page's front matter.
 ## Reusable components
 
 Any included file can declare its own `args` schema in front matter.
-`about/greeter.md` requires a `greeter` argument, and is included here a
+`greeter.md` requires a `greeter` argument, and is included here a
 few different ways:
 
 - Shorthand — resolves `greeter` from this page's own scope (set to
   "friend" above):  
 
 {{.block tip}}
-  `\{{.include about/greeter.md greeter}}`
+  `\{{.include greeter.md greeter}}`
 {{.end}}
 
   becomes
 
 {{.block tip}}
-  {{.include about/greeter.md greeter}}  
+  {{.include greeter.md greeter}}  
 {{.end}}
 
 - Quoted literal:
 
 {{.block tip}}
-  `\{{.include about/greeter.md greeter="World"}}`
+  `\{{.include greeter.md greeter="World"}}`
 {{.end}}
 
 becomes
 
 {{.block tip}}
-  {{.include about/greeter.md greeter="World"}}
+  {{.include greeter.md greeter="World"}}
 {{.end}}
 
 - A literal with a nested directive inside it:
 
 {{.block tip}}
-  `\{{.include about/greeter.md greeter="{{.var tagline | title}}"}}`
+  `\{{.include greeter.md greeter="\{{.var tagline | title}}"}}`
 {{.end}}
 
 becomes
 
 {{.block tip}}
-  {{.include about/greeter.md greeter="{{.var tagline | title}}"}}
+  {{.include greeter.md greeter="{{.var tagline | title}}"}}
 {{.end}}
 
 - A variable, filtered before it's passed along:
 
 {{.block tip}}
-  `\{{.include about/greeter.md greeter=status | upper}}`
+  `\{{.include greeter.md greeter=status | upper}}`
 {{.end}}
 
 becomes
 
 {{.block tip}}
-  {{.include about/greeter.md greeter=status | upper}}
+  {{.include greeter.md greeter=status | upper}}
 {{.end}}
 
 ## Markdown, in full {#markdown-tour}

@@ -115,8 +115,7 @@ deployment.
    [main README's front matter section](../../README.md#front-matter)).
 2. Link to it from `navbar.html` if it should appear in navigation.
 3. Reference shared pieces (e.g. `syntax-highlighting.html`) or
-   parameterized components (like `about/greeter.md`, included by
-   `about/index.md`) with `{{.include ...}}`.
+   parameterized components (like `greeter.md` with `{{.include ...}}`).
 
 The next request to that route compiles and caches it automatically — there
 is no separate build step for content changes, only for the Tailwind
