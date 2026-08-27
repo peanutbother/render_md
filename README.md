@@ -15,8 +15,8 @@ This is a workspace with three members:
 | Crate | Path | What it is |
 | --- | --- | --- |
 | [`render_md`](#render_md-library) | [`crates/render_md`](crates/render_md) | The library: `RenderEngine`, the template directive language, Markdown rendering, Tailwind integration. |
-| `render_md_cgi` | [`crates/render_md_cgi`](crates/render_md_cgi) | A `render_md`-based CGI binary (`render_md`) plus a small reusable library (`engine_from_env`/`serve`/`handle_error`) for classic CGI deployments, with a full worked example. |
-| `render_md_compile` | [`crates/render_md_compile`](crates/render_md_compile) | `compile_md`, a CLI that statically compiles a source directory ahead of time, for build steps/CI instead of lazy per-request rendering. |
+| [`render_md_cgi`](#render_md_cgi) | [`crates/render_md_cgi`](crates/render_md_cgi) | A `render_md`-based CGI binary (`render_md`) plus a small reusable library (`engine_from_env`/`serve`/`handle_error`) for classic CGI deployments, with a full worked example. |
+| [`render_md_compile`](#render_md_compile) | [`crates/render_md_compile`](crates/render_md_compile) | `compile_md`, a CLI that statically compiles a source directory ahead of time, for build steps/CI instead of lazy per-request rendering. |
 
 ```text
 .
