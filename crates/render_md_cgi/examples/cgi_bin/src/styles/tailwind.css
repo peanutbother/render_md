@@ -76,7 +76,7 @@ pre:has(code) {
 }
 
 pre code {
-  @apply block min-w-full whitespace-pre;
+  @apply block min-w-full whitespace-pre overflow-x-auto;
 }
 
 :not(pre) > code {
