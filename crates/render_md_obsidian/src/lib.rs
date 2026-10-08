@@ -60,6 +60,17 @@ pub struct BuildReport {
 
 /// Stages the vault and renders it into `options.out`.
 pub fn build(mut options: BuildOptions) -> Result<BuildReport, Error> {
+    // Tailwind runs with the staging directory as its working directory, so
+    // a relative `--out` would put the stylesheet into the stage.
+    let absolute = |path: &Path| std::path::absolute(path).map_err(|e| Error::read(e, path));
+    options.out = absolute(&options.out)?;
+    options.site.vault = absolute(&options.site.vault)?;
+    if let Some(theme) = &options.site.theme {
+        options.site.theme = Some(absolute(theme)?);
+    }
+    if let Some(stage) = &options.stage {
+        options.stage = Some(absolute(stage)?);
+    }
     options.site.skip_dirs.push(options.out.clone());
     let temp;
     let stage_dir: &Path = match &options.stage {
