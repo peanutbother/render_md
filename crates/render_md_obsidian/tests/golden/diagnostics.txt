@@ -1,3 +1,4 @@
 broken: lab/tools.md: unresolved link [[does not exist]]
 broken: notes/misc.md: [[web#No such heading]]: 'No such heading' is not a heading or block in 'lab/servers/web.md'
 broken: notes/misc.md: unresolved embed ![[missing note]]
+warning: lab/lab.md: the home note is the folder note of 'lab/', so that folder has no page of its own (its URL redirects to /)

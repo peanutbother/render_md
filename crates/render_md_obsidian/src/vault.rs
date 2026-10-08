@@ -22,6 +22,10 @@ pub type FileId = usize;
 /// (`.obsidian/`, `.git/`, `.trash/`) are always skipped as well.
 pub const DEFAULT_EXCLUDES: &[&str] = &["*.blueprint"];
 
+/// Names (without `.md`, any case) of a note at the vault root that is
+/// served at `/` when no home note is given, after the site title.
+pub const INDEX_NAMES: &[&str] = &["index", "home", "readme"];
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Target {
     Note(NoteId),
@@ -103,8 +107,11 @@ pub struct Folder {
 pub struct ScanOptions<'a> {
     /// `--exclude` globs, on top of [`DEFAULT_EXCLUDES`].
     pub excludes: &'a [String],
-    /// Vault-relative path of the note served at `/`.
+    /// Vault-relative path of the note served at `/`. Without it, an index
+    /// note at the vault root is used, see [`INDEX_NAMES`].
     pub home: Option<&'a str>,
+    /// The site title: a root note with this name is the index note.
+    pub title: &'a str,
     /// Directories never scanned (the output and staging directories, if
     /// they're inside the vault).
     pub skip_dirs: &'a [PathBuf],
@@ -218,8 +225,29 @@ impl Vault {
                     .find_note_by_path(home)
                     .ok_or_else(|| Error::home_not_found(home))?,
             ),
-            None => None,
+            None => vault.find_index(options.title),
         };
+        match vault.home {
+            None => diags.warn(
+                "",
+                format!(
+                    "no index note: / is a generated listing; add '{}.md' (or index.md) at the vault root, or pass --home",
+                    options.title
+                ),
+            ),
+            Some(id) => {
+                let note = &vault.notes[id];
+                if vault.folders[&note.folder].note == Some(id) {
+                    diags.warn(
+                        &note.path,
+                        format!(
+                            "the home note is the folder note of '{}/', so that folder has no page of its own (its URL redirects to /)",
+                            note.folder
+                        ),
+                    );
+                }
+            }
+        }
         vault.assign_routes()?;
         vault.build_lookup_tables();
         Ok(vault)
@@ -341,6 +369,21 @@ impl Vault {
             add(&mut self.by_name, file.name.clone(), target);
             add(&mut self.by_name_lower, file.name.to_lowercase(), target);
         }
+    }
+
+    /// The index note at the vault root: named like the site title, or one
+    /// of [`INDEX_NAMES`].
+    fn find_index(&self, title: &str) -> Option<NoteId> {
+        let root: Vec<NoteId> = (0..self.notes.len())
+            .filter(|id| self.notes[*id].folder.is_empty())
+            .collect();
+        std::iter::once(title)
+            .chain(INDEX_NAMES.iter().copied())
+            .find_map(|name| {
+                root.iter()
+                    .copied()
+                    .find(|id| self.notes[*id].name.eq_ignore_ascii_case(name.trim()))
+            })
     }
 
     /// Finds a note by its vault-relative path, `.md` optional, exact case
@@ -610,6 +653,69 @@ fn read_note(path: &str, raw: &str, diags: &mut Diagnostics) -> Note {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn scan_vault(files: &[&str], home: Option<&str>) -> (Vault, Diagnostics) {
+        let dir = tempfile::tempdir().unwrap();
+        for path in files {
+            let full = dir.path().join(path);
+            std::fs::create_dir_all(full.parent().unwrap()).unwrap();
+            std::fs::write(full, "").unwrap();
+        }
+        let mut diags = Diagnostics::default();
+        let options = ScanOptions {
+            excludes: &[],
+            home,
+            title: "infra",
+            skip_dirs: &[],
+        };
+        let vault = Vault::scan(dir.path(), &options, &mut diags).unwrap();
+        (vault, diags)
+    }
+
+    fn home_path(vault: &Vault) -> Option<&str> {
+        vault.home.map(|id| vault.notes[id].path.as_str())
+    }
+
+    #[test]
+    fn test_index_note_named_like_the_title_is_home() {
+        let (vault, diags) = scan_vault(&["Infra.md", "index.md", "lab/lab.md"], None);
+        assert_eq!(home_path(&vault), Some("Infra.md"));
+        assert!(diags.is_empty(), "{diags:?}");
+        assert_eq!(
+            vault.notes[vault.find_note_by_path("lab/lab.md").unwrap()].route,
+            "/lab/"
+        );
+    }
+
+    #[test]
+    fn test_index_md_is_home_without_a_title_note() {
+        let (vault, _) = scan_vault(&["README.md", "index.md"], None);
+        assert_eq!(home_path(&vault), Some("index.md"));
+    }
+
+    #[test]
+    fn test_missing_index_is_a_warning() {
+        let (vault, diags) = scan_vault(&["lab/lab.md", "lab/index.md"], None);
+        assert_eq!(home_path(&vault), None);
+        let messages: Vec<String> = diags.iter().map(|d| d.to_string()).collect();
+        assert_eq!(messages.len(), 1, "{messages:?}");
+        assert!(
+            messages[0].starts_with("warning: no index note"),
+            "{messages:?}"
+        );
+        assert!(messages[0].contains("'infra.md'"));
+    }
+
+    #[test]
+    fn test_folder_note_as_home_is_a_warning() {
+        let (vault, diags) = scan_vault(&["lab/lab.md"], Some("lab/lab.md"));
+        assert_eq!(home_path(&vault), Some("lab/lab.md"));
+        let messages: Vec<String> = diags.iter().map(|d| d.to_string()).collect();
+        assert!(
+            messages[0].contains("folder note of 'lab/'"),
+            "{messages:?}"
+        );
+    }
 
     #[test]
     fn test_split_front_matter() {

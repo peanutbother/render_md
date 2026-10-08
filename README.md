@@ -432,6 +432,9 @@ Options:
       --theme <THEME>           Directory overriding the built-in theme:
                                 `template.html`, `styles/tailwind.css`, `static/`
       --home <HOME>             Vault-relative path of the note served at `/`
+                                (default: a note at the vault root named like
+                                the site title, or index/home/readme; without
+                                one, `/` is a generated listing and a warning)
       --exclude <GLOB>          Leave out matching files or folders (repeatable);
                                 dot-files and `*.blueprint` are always left out
       --hide-property <GLOB>    Hide matching properties from the properties table

@@ -31,7 +31,8 @@ struct Args {
     #[arg(long)]
     theme: Option<PathBuf>,
 
-    /// Vault-relative path of the note served at `/`
+    /// Vault-relative path of the note served at `/` (default: a note at the
+    /// vault root named like the site title, or index, home or readme)
     #[arg(long)]
     home: Option<String>,
 

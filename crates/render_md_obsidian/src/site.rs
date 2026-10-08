@@ -60,15 +60,6 @@ pub fn stage(
     stage_dir: &Path,
     diags: &mut Diagnostics,
 ) -> Result<Staged, Error> {
-    let vault = Vault::scan(
-        &options.vault,
-        &ScanOptions {
-            excludes: &options.excludes,
-            home: options.home.as_deref(),
-            skip_dirs: &options.skip_dirs,
-        },
-        diags,
-    )?;
     let title = options.title.clone().unwrap_or_else(|| {
         options
             .vault
@@ -77,6 +68,16 @@ pub fn stage(
             .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
             .unwrap_or_else(|| "Vault".to_owned())
     });
+    let vault = Vault::scan(
+        &options.vault,
+        &ScanOptions {
+            excludes: &options.excludes,
+            home: options.home.as_deref(),
+            title: &title,
+            skip_dirs: &options.skip_dirs,
+        },
+        diags,
+    )?;
 
     let tags = vault.tag_index();
     if !tags.is_empty()

@@ -15,7 +15,8 @@ pub enum Severity {
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Diagnostic {
     pub severity: Severity,
-    /// Vault-relative path of the note (or file) the problem is in.
+    /// Vault-relative path of the note (or file) the problem is in, empty
+    /// for problems of the whole vault.
     pub source: String,
     pub message: String,
 }
@@ -26,7 +27,11 @@ impl fmt::Display for Diagnostic {
             Severity::Broken => "broken",
             Severity::Warning => "warning",
         };
-        write!(f, "{level}: {}: {}", self.source, self.message)
+        if self.source.is_empty() {
+            write!(f, "{level}: {}", self.message)
+        } else {
+            write!(f, "{level}: {}: {}", self.source, self.message)
+        }
     }
 }
 

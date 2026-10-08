@@ -228,6 +228,7 @@ mod tests {
             &ScanOptions {
                 excludes: &[],
                 home: None,
+                title: "Vault",
                 skip_dirs: &[],
             },
             &mut Diagnostics::default(),
