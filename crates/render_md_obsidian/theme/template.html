@@ -4,11 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{title}} · {{.var site_title}}</title>
+    <title>{{title}}{{.if !home}} · {{.var site_title}}{{.end}}</title>
     <link rel="stylesheet" href="/assets/style.css">
     <link rel="stylesheet" href="/assets/code.css">
     <link rel="icon" href="/assets/logo.svg">
     <script>
+        // Collapsing in the sidebar needs JS; without it, folders stay open.
+        document.documentElement.classList.add("js");
         // Apply the stored theme before the first paint.
         try {
             if (localStorage.theme) document.documentElement.dataset.theme = localStorage.theme;
@@ -50,22 +52,33 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js"></script>
     <script>
-        // Mark the current page in the sidebar and open the folders around it.
+        // Folders: the arrow collapses, the name opens the folder note (or
+        // collapses too, for folders without one), like the folder-notes plugin.
+        const setOpen = (li, open) => {
+            li.classList.toggle("open", open);
+            li.querySelector(":scope > .nav-row > button.nav-toggle")?.setAttribute("aria-expanded", open);
+        };
+        for (const li of document.querySelectorAll(".nav-tree .nav-folder")) {
+            const toggle = () => setOpen(li, !li.classList.contains("open"));
+            li.querySelector(":scope > .nav-row > button.nav-toggle")?.addEventListener("click", toggle);
+            if (!li.classList.contains("has-note"))
+                li.querySelector(":scope > .nav-row > .nav-folder-name").addEventListener("click", toggle);
+        }
+        // Mark the current page and open the folders around it.
         const here = decodeURI(location.pathname);
         for (const a of document.querySelectorAll(".nav-tree a")) {
             if (decodeURI(new URL(a.href).pathname) !== here) continue;
-            a.classList.add("menu-active");
-            for (let d = a.closest("details"); d; d = d.parentElement.closest("details")) d.open = true;
+            (a.closest(".nav-row") || a).classList.add("menu-active");
+            for (let li = a.closest(".nav-folder"); li; li = li.parentElement.closest(".nav-folder")) setOpen(li, true);
             a.scrollIntoView({ block: "nearest" });
         }
-        // Filter the sidebar by note name.
+        // Filter the sidebar by name; matching folders open.
         document.querySelector(".nav-filter").addEventListener("input", (e) => {
             const q = e.target.value.trim().toLowerCase();
             for (const li of document.querySelectorAll(".nav-tree li")) {
                 const match = !q || li.textContent.toLowerCase().includes(q);
                 li.hidden = !match;
-                const d = li.querySelector(":scope > details");
-                if (d && q) d.open = match;
+                if (q && li.classList.contains("nav-folder")) setOpen(li, match);
             }
         });
         // Light/dark toggle, remembered per browser.

@@ -30,6 +30,8 @@ pub struct SiteOptions {
     pub max_embed_depth: usize,
     /// Site title; defaults to the vault folder's name.
     pub title: Option<String>,
+    /// Title of the page at `/`; defaults to the home note's name.
+    pub home_title: Option<String>,
     /// A directory whose `template.html`, `styles/` and `static/` override
     /// the built-in theme.
     pub theme: Option<PathBuf>,
@@ -110,6 +112,7 @@ pub fn stage(
     let site = Site {
         vault: &vault,
         title: &title,
+        home_title: options.home_title.as_deref(),
     };
     for (id, note) in transformed.iter().enumerate() {
         let page = site.note_page(id, note, backlinks.get(&id));
@@ -171,6 +174,7 @@ pub fn stage(
 struct Site<'a> {
     vault: &'a Vault,
     title: &'a str,
+    home_title: Option<&'a str>,
 }
 
 impl Site<'_> {
@@ -205,7 +209,12 @@ impl Site<'_> {
                 .collect();
         }
 
-        let mut body = self.header(&n.name, &crumbs, self.vault.home != Some(id));
+        let is_home = self.vault.home == Some(id);
+        let name = match self.home_title {
+            Some(title) if is_home => title,
+            _ => n.name.as_str(),
+        };
+        let mut body = self.header(name, &crumbs, !is_home);
         if let Some(properties) = &note.properties {
             body.push_str(properties);
             body.push_str("\n\n");
@@ -225,7 +234,11 @@ impl Site<'_> {
             }
             body.push_str("</ul>\n</section>\n");
         }
-        self.page(&n.name, &body)
+        if is_home {
+            self.home_page(name, &body)
+        } else {
+            self.page(name, &body)
+        }
     }
 
     fn listing_page(&self, folder: &Folder) -> String {
@@ -327,10 +340,21 @@ impl Site<'_> {
     /// Step 7: front matter (title only, never `tags`) and the body, with
     /// step 6 applied.
     fn page(&self, title: &str, body: &str) -> String {
+        self.page_with(title, body, false)
+    }
+
+    /// The page at `/`: `home: 'true'` lets the template show its title
+    /// alone in the browser tab.
+    fn home_page(&self, title: &str, body: &str) -> String {
+        self.page_with(title, body, true)
+    }
+
+    fn page_with(&self, title: &str, body: &str, home: bool) -> String {
         format!(
-            "---\ntitle: {}\nsite_title: {}\n---\n\n{}",
+            "---\ntitle: {}\nsite_title: {}\n{}---\n\n{}",
             yaml_string(&escape_html(title)),
             yaml_string(&escape_html(self.title)),
+            if home { "home: 'true'\n" } else { "" },
             escape_directives(body.trim_end()) + "\n"
         )
     }
@@ -344,24 +368,44 @@ impl Site<'_> {
         out
     }
 
+    /// Like the folder-notes plugin: a folder with a folder note is a link
+    /// to it (and the note isn't listed inside), a folder without one is
+    /// just a name; only the arrow collapses a folder.
     fn nav_children(&self, path: &str, out: &mut String) {
         let folder = &self.vault.folders[path];
         for sub in &folder.subfolders {
             let child = &self.vault.folders[sub];
-            let link = format!(
-                "<a href=\"{}\">{}</a>",
-                escape_html(&self.vault.folder_link(sub)),
-                escape_html(&child.name)
-            );
-            if child.subfolders.is_empty() && child.notes.is_empty() {
-                out.push_str(&format!("<li class=\"nav-folder\">{link}</li>\n"));
+            let name = escape_html(&child.name);
+            let has_children = !(child.subfolders.is_empty() && child.notes.is_empty());
+            let (class, label) = match child.note {
+                Some(_) => (
+                    "nav-folder has-note",
+                    format!(
+                        "<a class=\"nav-folder-name\" href=\"{}\">{name}</a>",
+                        escape_html(&self.vault.folder_link(sub))
+                    ),
+                ),
+                None => (
+                    "nav-folder",
+                    format!("<span class=\"nav-folder-name\">{name}</span>"),
+                ),
+            };
+            let toggle = if has_children {
+                format!(
+                    "<button type=\"button\" class=\"nav-toggle\" aria-expanded=\"false\" aria-label=\"Toggle {name}\"></button>"
+                )
             } else {
-                out.push_str(&format!(
-                    "<li class=\"nav-folder\"><details><summary>{link}</summary>\n<ul>\n"
-                ));
+                "<span class=\"nav-toggle\"></span>".to_owned()
+            };
+            out.push_str(&format!(
+                "<li class=\"{class}\"><div class=\"nav-row\">{toggle}{label}</div>"
+            ));
+            if has_children {
+                out.push_str("\n<ul class=\"nav-children\">\n");
                 self.nav_children(sub, out);
-                out.push_str("</ul>\n</details></li>\n");
+                out.push_str("</ul>\n");
             }
+            out.push_str("</li>\n");
         }
         for id in &folder.notes {
             if self.vault.home == Some(*id) {

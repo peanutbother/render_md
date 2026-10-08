@@ -18,6 +18,7 @@ pub fn site_options(vault: PathBuf, home: Option<&str>) -> SiteOptions {
         embeds: EmbedMode::Collapsed,
         max_embed_depth: 10,
         title: Some("Lab".to_owned()),
+        home_title: Some("Lab overview".to_owned()),
         theme: None,
         skip_dirs: Vec::new(),
     }

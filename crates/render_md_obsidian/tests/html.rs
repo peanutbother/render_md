@@ -55,6 +55,9 @@ fn test_fixture_vault_renders() {
     }
 
     let home = page(out, "/");
+    assert!(home.contains("<title>Lab overview</title>"), "{home}");
+    assert!(home.contains("<div class=\"inline-title\">Lab overview</div>"));
+    assert!(page(out, "/lab/tools/").contains("<title>tools · Lab</title>"));
     assert!(home.contains("<a href=\"#servers\">Servers</a>"), "{home}");
     assert!(home.contains("<h2 id=\"servers\">Servers</h2>"));
     assert!(home.contains("<th>name</th><th>service</th><th>node</th>"));

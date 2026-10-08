@@ -53,9 +53,14 @@ struct Args {
     #[arg(long, default_value_t = 10)]
     max_embed_depth: usize,
 
-    /// Site title (default: the vault folder's name)
+    /// Site title, shown in the sidebar and browser tabs (default: the
+    /// vault folder's name)
     #[arg(long)]
     title: Option<String>,
+
+    /// Title of the page at `/` (default: the home note's name)
+    #[arg(long)]
+    home_title: Option<String>,
 
     /// Fail on broken links, broken embeds and pages that fail to render
     #[arg(long)]
@@ -108,6 +113,7 @@ fn main() -> ExitCode {
             },
             max_embed_depth: args.max_embed_depth,
             title: args.title,
+            home_title: args.home_title,
             theme: args.theme,
             skip_dirs: Vec::new(),
         },

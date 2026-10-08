@@ -404,9 +404,10 @@ a static site that reads like the vault does in Obsidian:
   and `file.hasTag()`, the first table view's `order`, `sort` and `limit`.
 - **Kanban boards** (kanban plugin) as columns; `dataview`/`dataviewjs`/
   `tasks` queries as a muted "not rendered" box; `%% comments %%` removed.
-- **Folder notes** (`a/b/b.md` is the page of `a/b/`), a sidebar with the
-  folder tree, breadcrumbs, and generated pages for folders without a
-  folder note.
+- **Folder notes** (`a/b/b.md` is the page of `a/b/`), as with the
+  folder-notes plugin: in the sidebar, a folder with a folder note opens it
+  and only its arrow collapses it; the note isn't listed again inside.
+  Breadcrumbs, and generated pages for folders without a folder note.
 
 It works by transpiling the vault into an ordinary render_md source tree
 (one `src/<route>/index.md` per note, see `--stage`) and rendering that with
@@ -436,7 +437,10 @@ Options:
       --hide-property <GLOB>    Hide matching properties from the properties table
       --embeds <EMBEDS>         collapsed (default) or inline
       --max-embed-depth <N>     Maximum nesting of embeds [default: 10]
-      --title <TITLE>           Site title (default: the vault folder's name)
+      --title <TITLE>           Site title, in the sidebar and browser tabs
+                                (default: the vault folder's name)
+      --home-title <TITLE>      Title of the page at `/` (default: the home
+                                note's name)
       --strict                  Fail on broken links, broken embeds and pages
                                 that fail to render
       --skip-styles             Don't compile the stylesheet (no tailwindcss needed)

@@ -274,8 +274,34 @@ details.query summary {
 .nav-tree {
   @apply p-0 w-full text-sm;
 }
-.nav-tree summary > a {
-  @apply p-0 bg-transparent;
+.js .nav-folder:not(.open) > .nav-children {
+  display: none;
+}
+.nav-row {
+  @apply flex items-center gap-1;
+}
+.nav-toggle {
+  @apply inline-flex justify-center w-4 shrink-0 text-base-content/50;
+}
+button.nav-toggle {
+  @apply cursor-pointer;
+}
+button.nav-toggle::before {
+  content: "›";
+  @apply inline-block transition-transform;
+}
+.nav-folder.open > .nav-row > button.nav-toggle::before {
+  transform: rotate(90deg);
+}
+.nav-folder-name {
+  @apply flex-1;
+}
+span.nav-folder-name {
+  @apply cursor-pointer;
+}
+/* Folders with a folder note (underlineFolder in the plugin). */
+.has-note > .nav-row > .nav-folder-name {
+  @apply underline decoration-base-content/30 underline-offset-2;
 }
 .nav-tags {
   @apply mt-2 pt-2 border-base-300 border-t;

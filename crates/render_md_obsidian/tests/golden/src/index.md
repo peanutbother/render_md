@@ -1,10 +1,11 @@
 ---
-title: 'lab'
+title: 'Lab overview'
 site_title: 'Lab'
+home: 'true'
 ---
 
 <header class="note-header">
-<div class="inline-title">lab</div>
+<div class="inline-title">Lab overview</div>
 </header>
 
 # Lab {#lab}
