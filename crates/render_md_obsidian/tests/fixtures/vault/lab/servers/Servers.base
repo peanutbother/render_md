@@ -1,0 +1,14 @@
+filters:
+  and:
+    - file.inFolder("lab/servers")
+    - file.hasProperty("blueprint")
+views:
+  - type: table
+    name: Servers
+    order:
+      - file.name
+      - service
+      - node
+      - ip
+      - monitored
+      - tags

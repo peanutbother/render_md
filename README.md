@@ -10,13 +10,14 @@ site generator, a build script, or a long-running server.
 
 ## Crates
 
-This is a workspace with three members:
+This is a workspace with four members:
 
 | Crate | Path | What it is |
 | --- | --- | --- |
 | [`render_md`](#render_md-library) | [`crates/render_md`](crates/render_md) | The library: `RenderEngine`, the template directive language, Markdown rendering, Tailwind integration. |
 | [`render_md_cgi`](#render_md_cgi) | [`crates/render_md_cgi`](crates/render_md_cgi) | A `render_md`-based CGI binary (`render_md`) plus a small reusable library (`engine_from_env`/`serve`/`handle_error`) for classic CGI deployments, with a full worked example. |
 | [`render_md_compile`](#render_md_compile) | [`crates/render_md_compile`](crates/render_md_compile) | `compile_md`, a CLI that statically compiles a source directory ahead of time, for build steps/CI instead of lazy per-request rendering. |
+| [`render_md_obsidian`](#render_md_obsidian) | [`crates/render_md_obsidian`](crates/render_md_obsidian) | `compile_vault`, a CLI (and library) that turns an Obsidian vault into a static site: wikilinks, embeds, callouts, properties, bases. |
 
 ```text
 .
@@ -26,7 +27,8 @@ This is a workspace with three members:
 │  ├─ render_md_cgi/
 │  │  ├─ src/                     # `render_md` bin + `render_md_cgi` lib
 │  │  └─ examples/cgi_bin/        # full worked example (see its own README)
-│  └─ render_md_compile/          # `compile_md` bin
+│  ├─ render_md_compile/          # `compile_md` bin
+│  └─ render_md_obsidian/         # `compile_vault` bin + lib
 └─ flake.nix                      # Nix dev shell / build
 ```
 
@@ -377,6 +379,96 @@ cargo install render_md_compile
 ```
 
 The binary will be called `compile_md`.
+
+## render_md_obsidian
+
+[`crates/render_md_obsidian`](crates/render_md_obsidian) builds
+`compile_vault`, which renders an [Obsidian](https://obsidian.md) vault into
+a static site that reads like the vault does in Obsidian:
+
+- **Links**: `[[note]]`, `[[path/note|alias]]`, `[[note#Heading]]`,
+  `[[#Heading]]`, `[[note#^block]]`, with Obsidian's resolution rules
+  (vault paths, path suffixes, bare names preferring the linking note's
+  folder, aliases, case-insensitive fallback). Escaped pipes in tables
+  (`[[a\|b]]`) work. Links to excluded files become plain text; links that
+  don't resolve are marked and reported.
+- **Embeds**: whole notes (collapsed `<details>` by default, `--embeds
+  inline`), heading sections (`![[note#Heading]]`), images, audio, video,
+  and `.base` files as tables.
+- **Callouts**: `> [!type]`, `+`/`-` folding, titles with inline Markdown and
+  tags, nested callouts, callouts in lists.
+- **Properties** as a table above the note (lists, booleans, links,
+  `domain` and URLs as links); **tags** (`#tag` and the `tags` property)
+  with a page per tag; **backlinks** under every note.
+- **Bases**: `and`/`or`/`not` over `file.inFolder()`, `file.hasProperty()`
+  and `file.hasTag()`, the first table view's `order`, `sort` and `limit`.
+- **Kanban boards** (kanban plugin) as columns; `dataview`/`dataviewjs`/
+  `tasks` queries as a muted "not rendered" box; `%% comments %%` removed.
+- **Folder notes** (`a/b/b.md` is the page of `a/b/`), a sidebar with the
+  folder tree, breadcrumbs, and generated pages for folders without a
+  folder note.
+
+It works by transpiling the vault into an ordinary render_md source tree
+(one `src/<route>/index.md` per note, see `--stage`) and rendering that with
+`RenderEngine`, so the `render_md` crate itself needs no Obsidian
+knowledge. URLs are lowercase slugs of the vault paths
+(`Notes/My Note.md` → `/notes/my-note/`); serve them with something like
+nginx's `try_files $uri $uri/ $uri/index.html =404`.
+
+```bash
+compile_vault --vault ~/vault --out public --home notes/home.md \
+  --hide-property 'internal_*' --strict
+```
+
+```text
+Usage: compile_vault [OPTIONS] --vault <VAULT> --out <OUT>
+
+Options:
+      --vault <VAULT>           The vault's root folder
+      --out <OUT>               Directory the site is written to (existing files
+                                are overwritten, never deleted)
+      --stage <STAGE>           Keep the generated render_md source tree here
+      --theme <THEME>           Directory overriding the built-in theme:
+                                `template.html`, `styles/tailwind.css`, `static/`
+      --home <HOME>             Vault-relative path of the note served at `/`
+      --exclude <GLOB>          Leave out matching files or folders (repeatable);
+                                dot-files and `*.blueprint` are always left out
+      --hide-property <GLOB>    Hide matching properties from the properties table
+      --embeds <EMBEDS>         collapsed (default) or inline
+      --max-embed-depth <N>     Maximum nesting of embeds [default: 10]
+      --title <TITLE>           Site title (default: the vault folder's name)
+      --strict                  Fail on broken links, broken embeds and pages
+                                that fail to render
+      --skip-styles             Don't compile the stylesheet (no tailwindcss needed)
+      --detailed-errors         miette-formatted render errors (only with the
+                                `detailed-errors` feature)
+```
+
+The built-in theme (Tailwind v4 + daisyUI, like the `cgi_bin` example) is
+compiled into the binary; the stylesheet needs a `tailwindcss` v4 binary on
+`PATH` (or `TAILWIND_BIN`) unless `--skip-styles` is given. Problems inside
+notes are printed to stderr as `broken:` (fails `--strict`) or `warning:`.
+
+Static Linux builds (`x86_64-unknown-linux-musl`) are attached to
+`render_md_obsidian-v*` releases by
+[`.github/workflows/release-compile-vault.yml`](.github/workflows/release-compile-vault.yml).
+Install from source with:
+
+```bash
+cargo install render_md_obsidian
+```
+
+The binary will be called `compile_vault`. Tests run against a synthetic
+vault in [`tests/fixtures/vault`](crates/render_md_obsidian/tests/fixtures/vault),
+with the staged output checked against
+[`tests/golden`](crates/render_md_obsidian/tests/golden)
+(`UPDATE_GOLDEN=1 cargo test -p render_md_obsidian` re-blesses it). To try a
+real vault without committing anything from it:
+
+```bash
+VAULT_DIR=~/vault VAULT_HOME=notes/home.md \
+  cargo test -p render_md_obsidian -- --ignored --nocapture
+```
 
 ## Development
 

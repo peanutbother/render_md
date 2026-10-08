@@ -16,6 +16,8 @@ concurrency:
 
 jobs:
   build:
+    # GitHub Pages only; Forgejo reads this directory too.
+    if: github.server_url == 'https://github.com'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

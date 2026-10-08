@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}} · {{.var site_title}}</title>
+    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="/assets/code.css">
+    <link rel="icon" href="/assets/logo.svg">
+    <script>
+        // Apply the stored theme before the first paint.
+        try {
+            if (localStorage.theme) document.documentElement.dataset.theme = localStorage.theme;
+        } catch (_) {}
+    </script>
+</head>
+
+<body class="bg-base-100 text-base-content antialiased">
+    <div class="drawer lg:drawer-open">
+        <input id="nav-drawer" type="checkbox" class="drawer-toggle">
+        <div class="flex flex-col min-h-screen drawer-content">
+            <header class="lg:hidden top-0 z-30 sticky bg-base-100/90 backdrop-blur border-b border-base-200 navbar">
+                <label for="nav-drawer" class="btn btn-ghost btn-square" aria-label="Open navigation">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </label>
+                <a href="/" class="font-bold text-lg btn btn-ghost">{{.var site_title}}</a>
+            </header>
+            <main class="mx-auto px-6 py-8 w-full max-w-5xl note">
+                {{body}}
+            </main>
+        </div>
+        <div class="z-40 drawer-side">
+            <label for="nav-drawer" class="drawer-overlay" aria-label="Close navigation"></label>
+            <aside class="flex flex-col gap-2 bg-base-200 p-3 w-72 min-h-full sidebar">
+                <div class="flex items-center gap-2 px-2">
+                    <a href="/" class="flex flex-1 items-center gap-2 font-bold text-primary text-lg">
+                        <img src="/assets/logo.svg" alt="" class="w-6 h-6">
+                        <span>{{.var site_title}}</span>
+                    </a>
+                    <button type="button" class="btn btn-ghost btn-sm btn-square theme-toggle" aria-label="Toggle dark mode">◐</button>
+                </div>
+                <input type="search" class="input input-sm w-full nav-filter" placeholder="Filter notes" aria-label="Filter notes">
+                {{.include nav.html}}
+            </aside>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-core.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script>
+        // Mark the current page in the sidebar and open the folders around it.
+        const here = decodeURI(location.pathname);
+        for (const a of document.querySelectorAll(".nav-tree a")) {
+            if (decodeURI(new URL(a.href).pathname) !== here) continue;
+            a.classList.add("menu-active");
+            for (let d = a.closest("details"); d; d = d.parentElement.closest("details")) d.open = true;
+            a.scrollIntoView({ block: "nearest" });
+        }
+        // Filter the sidebar by note name.
+        document.querySelector(".nav-filter").addEventListener("input", (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            for (const li of document.querySelectorAll(".nav-tree li")) {
+                const match = !q || li.textContent.toLowerCase().includes(q);
+                li.hidden = !match;
+                const d = li.querySelector(":scope > details");
+                if (d && q) d.open = match;
+            }
+        });
+        // Light/dark toggle, remembered per browser.
+        document.querySelector(".theme-toggle").addEventListener("click", () => {
+            const root = document.documentElement;
+            const dark = root.dataset.theme
+                ? root.dataset.theme === "dark"
+                : matchMedia("(prefers-color-scheme: dark)").matches;
+            root.dataset.theme = dark ? "light" : "dark";
+            try { localStorage.theme = root.dataset.theme; } catch (_) {}
+        });
+    </script>
+</body>
+
+</html>

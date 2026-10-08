@@ -1,0 +1,61 @@
+# Builds a static `compile_vault` (x86_64-unknown-linux-musl) and attaches it
+# to a release, for tags like `render_md_obsidian-v0.1.0`. Runs on GitHub and
+# on Forgejo Actions.
+#
+# Repository variables (optional):
+#   RUNNER  runner label, default `ubuntu-latest` (on Forgejo: the label of a
+#           runner whose image has node, which the JS actions need)
+name: Release compile_vault
+
+on:
+  push:
+    tags: ["render_md_obsidian-v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        run: |
+          if ! command -v rustup >/dev/null; then
+            curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+            echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+            export PATH="$HOME/.cargo/bin:$PATH"
+          fi
+          rustup target add x86_64-unknown-linux-musl
+
+      - name: Test
+        run: cargo test -p render_md_obsidian --locked
+
+      - name: Build
+        run: |
+          cargo build --release --locked -p render_md_obsidian --bin compile_vault \
+            --target x86_64-unknown-linux-musl
+          mkdir dist
+          cp target/x86_64-unknown-linux-musl/release/compile_vault dist/compile_vault-x86_64-linux-musl
+          ./dist/compile_vault-x86_64-linux-musl --version
+          cd dist && sha256sum * > SHA256SUMS
+
+      # The release APIs differ: one step per forge.
+      - name: Release (GitHub)
+        if: startsWith(github.ref, 'refs/tags/') && github.server_url == 'https://github.com'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+
+      - name: Release (Forgejo)
+        if: startsWith(github.ref, 'refs/tags/') && github.server_url != 'https://github.com'
+        uses: https://code.forgejo.org/actions/forgejo-release@v2
+        with:
+          direction: upload
+          url: ${{ github.server_url }}
+          repo: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref_name }}
+          release-dir: dist

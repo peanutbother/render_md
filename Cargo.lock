@@ -450,6 +450,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "render_md_obsidian"
+version = "0.1.0"
+dependencies = [
+ "clap",
+ "miette",
+ "pulldown-cmark",
+ "render_md",
+ "tempfile",
+ "thiserror",
+ "thiserror-ext",
+ "walkdir",
+]
+
+[[package]]
 name = "rustc-demangle"
 version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -23,7 +23,15 @@
 
         craneLib = (crane.mkLib pkgs).overrideToolchain rustToolchain;
 
-        src = craneLib.cleanCargoSource (craneLib.path ./.);
+        # `cleanCargoSource` keeps only Rust/Cargo files; render_md_obsidian
+        # also compiles in its theme (HTML/CSS/JS) and tests against a
+        # fixture vault and golden files.
+        src = pkgs.lib.cleanSourceWith {
+          src = craneLib.path ./.;
+          filter = path: type:
+            (craneLib.filterCargoSources path type)
+            || (builtins.match ".*/crates/render_md_obsidian/(theme|tests)(/.*)?" path != null);
+        };
 
         commonArgs = {
           inherit src;
@@ -60,6 +68,12 @@
           cargoExtraArgs = "-p render_md_compile --bin compile_md";
         });
 
+        compile_vault = craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+          pname = "compile_vault";
+          cargoExtraArgs = "-p render_md_obsidian --bin compile_vault";
+        });
+
         compile_md_detailed = craneLib.buildPackage (commonArgs // {
           inherit cargoArtifacts;
           pname = "compile_md";
@@ -67,14 +81,14 @@
         });
       in
       {
-        # `nix build` (packages.default) builds both binaries;
-        # `nix build .#render_md` / `.#compile_md` build just one.
+        # `nix build` (packages.default) builds all binaries;
+        # `nix build .#render_md` / `.#compile_md` / `.#compile_vault` build just one.
         packages = {
           default = pkgs.symlinkJoin {
             name = "render_md-bins";
-            paths = [ render_md compile_md ];
+            paths = [ render_md compile_md compile_vault ];
           };
-          inherit render_md render_md_detailed compile_md compile_md_detailed;
+          inherit render_md render_md_detailed compile_md compile_md_detailed compile_vault;
         };
 
         apps = {
@@ -89,6 +103,10 @@
           compile_md = flake-utils.lib.mkApp {
             drv = compile_md;
             name = "compile_md";
+          };
+          compile_vault = flake-utils.lib.mkApp {
+            drv = compile_vault;
+            name = "compile_vault";
           };
           compile_md_detailed = flake-utils.lib.mkApp {
             drv = compile_md_detailed;

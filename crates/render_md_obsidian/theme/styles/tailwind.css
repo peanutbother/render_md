@@ -1,0 +1,282 @@
+@import "tailwindcss";
+@source "../../";
+/* Only the components the template and pages use: the full bundle is
+   ~400 KB of CSS. Add names here when a custom template needs more. */
+@plugin "./daisyui.mjs" {
+  themes: false;
+  include: drawer, menu, navbar, button, input, table, badge, breadcrumbs;
+}
+
+@plugin "./daisyui-theme.mjs" {
+  name: "light";
+  default: true;
+  --color-primary: #7c3aed;
+}
+
+@plugin "./daisyui-theme.mjs" {
+  name: "dark";
+  prefersdark: true;
+  --color-primary: #a78bfa;
+}
+
+/* ── Note content ───────────────────────────────────────── */
+
+.note {
+  @apply leading-relaxed;
+}
+
+.note h1 {
+  @apply mt-8 mb-4 font-bold text-3xl;
+}
+.note h2 {
+  @apply mt-8 mb-3 font-bold text-2xl;
+}
+.note h3 {
+  @apply mt-6 mb-2 font-semibold text-xl;
+}
+.note h4,
+.note h5,
+.note h6 {
+  @apply mt-4 mb-2 font-semibold;
+}
+.note :is(h1, h2, h3, h4, h5, h6) {
+  scroll-margin-top: 4rem;
+}
+
+.note p {
+  @apply my-3;
+}
+.note a {
+  @apply text-primary hover:underline;
+}
+.note ul {
+  @apply my-3 pl-6 list-disc;
+}
+.note ol {
+  @apply my-3 pl-6 list-decimal;
+}
+.note li {
+  @apply my-1;
+}
+.note li:has(> input[type="checkbox"]) {
+  @apply list-none -ml-5;
+}
+.note hr {
+  @apply my-6 border-base-300;
+}
+.note blockquote {
+  @apply my-4 pl-4 border-base-300 border-l-4 text-base-content/80;
+}
+
+.note table {
+  @apply table my-4 w-auto table-sm;
+}
+.note :where(thead) th {
+  @apply text-base-content;
+}
+.note :where(.base, .note > table) {
+  @apply overflow-x-auto;
+}
+
+.note pre {
+  @apply bg-base-200 my-4 p-4 rounded-box overflow-x-auto text-sm;
+}
+.note :not(pre) > code {
+  @apply bg-base-200 px-1 py-0.5 rounded text-[0.9em];
+}
+
+/* ── Page header ────────────────────────────────────────── */
+
+.note-header {
+  @apply mb-6;
+}
+.note-header .breadcrumbs {
+  @apply py-0 text-sm text-base-content/60;
+}
+.note-header .breadcrumbs a {
+  @apply text-base-content/60;
+}
+.inline-title {
+  @apply font-extrabold text-4xl break-words;
+}
+
+/* ── Properties ─────────────────────────────────────────── */
+
+.note table.properties {
+  @apply bg-base-200/60 mt-0 mb-6 rounded-box text-sm;
+}
+.note table.properties th {
+  @apply w-40 font-normal text-base-content/60 align-top;
+}
+.prop-true {
+  @apply text-success;
+}
+.prop-false {
+  @apply text-base-content/40;
+}
+
+/* ── Tags and links ─────────────────────────────────────── */
+
+.note a.tag,
+.sidebar a.tag {
+  @apply badge badge-sm badge-soft badge-primary no-underline align-middle;
+}
+.broken-link {
+  @apply decoration-error decoration-dashed underline underline-offset-2 text-error cursor-help;
+}
+
+/* ── Callouts ───────────────────────────────────────────── */
+
+.callout {
+  --callout: var(--color-info);
+  @apply my-4 border-l-4 rounded-box overflow-hidden;
+  border-color: var(--callout);
+  background: color-mix(in oklab, var(--callout) 10%, transparent);
+}
+.callout-title {
+  @apply flex items-center gap-2 px-4 py-2 font-semibold;
+  color: var(--callout);
+}
+.callout-title::before {
+  content: var(--callout-icon, "ℹ");
+}
+summary.callout-title {
+  @apply cursor-pointer select-none;
+}
+summary.callout-title::after {
+  content: "›";
+  @apply ml-auto transition-transform;
+}
+details.callout[open] > summary.callout-title::after {
+  transform: rotate(90deg);
+}
+.callout-content {
+  @apply px-4 pb-2 overflow-x-auto;
+}
+.callout-content > :first-child {
+  @apply mt-0;
+}
+
+.callout[data-callout="tip"],
+.callout[data-callout="hint"],
+.callout[data-callout="important"] {
+  --callout: var(--color-accent);
+  --callout-icon: "💡";
+}
+.callout[data-callout="fix"],
+.callout[data-callout="success"],
+.callout[data-callout="check"],
+.callout[data-callout="done"] {
+  --callout: var(--color-success);
+  --callout-icon: "🔧";
+}
+.callout[data-callout="warning"],
+.callout[data-callout="warn"],
+.callout[data-callout="caution"],
+.callout[data-callout="attention"] {
+  --callout: var(--color-warning);
+  --callout-icon: "⚠";
+}
+.callout[data-callout="danger"],
+.callout[data-callout="error"],
+.callout[data-callout="failure"],
+.callout[data-callout="fail"],
+.callout[data-callout="bug"] {
+  --callout: var(--color-error);
+  --callout-icon: "🐞";
+}
+.callout[data-callout="example"] {
+  --callout: var(--color-secondary);
+  --callout-icon: "☰";
+}
+.callout[data-callout="note"],
+.callout[data-callout="info"],
+.callout[data-callout="todo"] {
+  --callout: var(--color-info);
+  --callout-icon: "✎";
+}
+.callout[data-callout="quote"],
+.callout[data-callout="cite"] {
+  --callout: var(--color-neutral);
+  --callout-icon: "❝";
+}
+.callout[data-callout="question"],
+.callout[data-callout="faq"],
+.callout[data-callout="help"] {
+  --callout: var(--color-warning);
+  --callout-icon: "?";
+}
+
+/* ── Embeds, bases, queries ─────────────────────────────── */
+
+.embed {
+  @apply my-4 border-base-300 border-l-4 pl-4;
+}
+.embed-title {
+  @apply text-sm text-base-content/60;
+}
+summary.embed-title {
+  @apply cursor-pointer;
+}
+.embed-content > :first-child {
+  @apply mt-2;
+}
+.embed-file,
+.broken-embed {
+  @apply my-4;
+}
+.base-unsupported,
+details.query {
+  @apply bg-base-200 my-4 px-4 py-2 rounded-box text-sm text-base-content/60;
+}
+details.query summary {
+  @apply cursor-pointer;
+}
+
+/* ── Kanban ─────────────────────────────────────────────── */
+
+.kanban {
+  @apply gap-4 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 my-4;
+}
+.kanban-lane {
+  @apply bg-base-200 p-4 rounded-box;
+}
+.kanban-lane > h2 {
+  @apply mt-0 text-lg;
+}
+.kanban-lane li {
+  @apply bg-base-100 shadow-sm my-2 p-2 rounded;
+}
+
+/* ── Backlinks and listings ─────────────────────────────── */
+
+.backlinks {
+  @apply mt-12 pt-4 border-base-300 border-t text-sm;
+}
+.backlinks-title {
+  @apply mb-2 font-semibold text-base-content/60;
+}
+.backlink-folder {
+  @apply text-base-content/40;
+}
+.note ul.listing {
+  @apply list-none pl-0;
+}
+.listing-folder a {
+  @apply font-semibold;
+}
+.tag-count {
+  @apply text-base-content/40 text-sm;
+}
+
+/* ── Sidebar ────────────────────────────────────────────── */
+
+.nav-tree {
+  @apply p-0 w-full text-sm;
+}
+.nav-tree summary > a {
+  @apply p-0 bg-transparent;
+}
+.nav-tags {
+  @apply mt-2 pt-2 border-base-300 border-t;
+}
